@@ -88,6 +88,7 @@ export default function NewSalePage() {
   
   // Checkout States
   const [discountInput, setDiscountInput] = useState("");
+  const [surchargeInput, setSurchargeInput] = useState("");
   const [downPaymentInput, setDownPaymentInput] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("PIX");
   const [installmentCount, setInstallmentCount] = useState(1);
@@ -235,8 +236,9 @@ export default function NewSalePage() {
   // Calculations
   const subtotal = cart.reduce((sum, item) => sum + item.customPrice * item.quantity, 0);
   const discountVal = parseMoneyToFloat(discountInput);
+  const surchargeVal = parseMoneyToFloat(surchargeInput);
   const tradeInVal = tradeInEnabled ? parseMoneyToFloat(tiEvalPrice) : 0;
-  const netTotal = Math.max(subtotal - discountVal - tradeInVal, 0);
+  const netTotal = Math.max(subtotal - discountVal - tradeInVal + surchargeVal, 0);
   const downPaymentVal = parseMoneyToFloat(downPaymentInput);
   const remainingTotal = Math.max(netTotal - downPaymentVal, 0);
 
@@ -335,6 +337,7 @@ export default function NewSalePage() {
         price: item.customPrice,
       })),
       discountAmount: discountVal,
+      surchargeAmount: paymentMethod === "PARCELADO_LOJA" ? surchargeVal : 0,
       downPayment: downPaymentVal,
       paymentMethod,
       installmentCount: paymentMethod === "PARCELADO_LOJA" ? installmentCount : 1,
@@ -517,6 +520,7 @@ export default function NewSalePage() {
     setSelectedCustomerId("");
     setCustomerSearch("");
     setDiscountInput("");
+    setSurchargeInput("");
     setDownPaymentInput("");
     setPaymentMethod("PIX");
     setInstallmentCount(1);
@@ -768,6 +772,20 @@ export default function NewSalePage() {
                     type="text"
                     value={downPaymentInput}
                     onChange={(e) => setDownPaymentInput(maskMoney(e.target.value))}
+                    placeholder="R$ 0,00"
+                    className="w-full px-3.5 py-2.5 bg-input border border-border text-foreground placeholder-muted-foreground/60 rounded-xl text-sm focus:outline-none"
+                  />
+                </div>
+
+                {/* Acréscimo */}
+                <div>
+                  <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">
+                    Acréscimo (Juros / Taxa)
+                  </label>
+                  <input
+                    type="text"
+                    value={surchargeInput}
+                    onChange={(e) => setSurchargeInput(maskMoney(e.target.value))}
                     placeholder="R$ 0,00"
                     className="w-full px-3.5 py-2.5 bg-input border border-border text-foreground placeholder-muted-foreground/60 rounded-xl text-sm focus:outline-none"
                   />
@@ -1094,10 +1112,12 @@ export default function NewSalePage() {
                 <span>Subtotal dos itens</span>
                 <span>{formatBRL(subtotal)}</span>
               </div>
-              <div className="flex items-center justify-between text-muted-foreground">
-                <span>Desconto</span>
-                <span className="text-rose-600 dark:text-rose-400 font-bold">- {formatBRL(discountVal)}</span>
-              </div>
+              {discountVal > 0 && (
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span>Desconto</span>
+                  <span className="text-rose-600 dark:text-rose-400 font-bold">- {formatBRL(discountVal)}</span>
+                </div>
+              )}
               {tradeInEnabled && tradeInVal > 0 && (
                 <div className="flex items-center justify-between text-amber-600 dark:text-amber-400 font-bold">
                   <span className="flex items-center gap-1">
@@ -1105,6 +1125,12 @@ export default function NewSalePage() {
                     Trade-in
                   </span>
                   <span>- {formatBRL(tradeInVal)}</span>
+                </div>
+              )}
+              {paymentMethod === "PARCELADO_LOJA" && surchargeVal > 0 && (
+                <div className="flex items-center justify-between text-sky-600 dark:text-sky-400 font-bold">
+                  <span>Acréscimo</span>
+                  <span>+ {formatBRL(surchargeVal)}</span>
                 </div>
               )}
               <div className="flex items-center justify-between text-base font-extrabold text-foreground border-t border-border pt-2 mt-2">
@@ -1266,6 +1292,11 @@ export default function NewSalePage() {
                     {tradeInVal > 0 && (
                       <div className="flex justify-between px-3 py-2 text-amber-600 dark:text-amber-400">
                         <span>Trade-in</span><span>— {formatBRL(tradeInVal)}</span>
+                      </div>
+                    )}
+                    {paymentMethod === "PARCELADO_LOJA" && surchargeVal > 0 && (
+                      <div className="flex justify-between px-3 py-2 text-sky-600 dark:text-sky-400">
+                        <span>Acréscimo</span><span>+ {formatBRL(surchargeVal)}</span>
                       </div>
                     )}
                     <div className="flex justify-between px-3 py-3 bg-foreground text-background font-black text-sm">

@@ -300,7 +300,7 @@ export default function ContractPage() {
         <div>
           <p>
             Pelo presente instrumento particular, de um lado, na qualidade de{" "}
-            <strong>VENDEDORA</strong>: <strong>{company.name}</strong>
+            <strong>CONTRATADA</strong>: <strong>{company.name}</strong>
             {company.tradeName ? `, nome fantasia ${company.tradeName}` : ""},
             inscrita no CNPJ sob o nº <strong>{company.cnpj}</strong>, com sede em{" "}
             {enderecoEmpresa}; e de outro lado, na qualidade de{" "}
@@ -427,7 +427,7 @@ export default function ContractPage() {
             </h3>
             <p className="mt-2">
               As parcelas vencerão nas datas especificadas abaixo. O pagamento deverá ser
-              realizado diretamente no caixa da loja física da VENDEDORA ou via canais
+              realizado diretamente no caixa da loja física da CONTRATADA ou via canais
               autorizados (PIX fornecido pela gerência).
             </p>
             {sale.installments.length > 0 ? (
@@ -617,7 +617,7 @@ export default function ContractPage() {
           <div className="space-y-1">
             <div className="border-t border-zinc-400 w-full pt-2" />
             <p className="font-bold text-zinc-900">{company.name}</p>
-            <p className="text-[10px] text-zinc-500">VENDEDORA (CNPJ: {company.cnpj})</p>
+            <p className="text-[10px] text-zinc-500">CONTRATADA (CNPJ: {company.cnpj})</p>
           </div>
         </div>
 

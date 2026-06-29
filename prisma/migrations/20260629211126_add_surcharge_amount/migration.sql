@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Sale" ADD COLUMN     "surchargeAmount" DOUBLE PRECISION NOT NULL DEFAULT 0;

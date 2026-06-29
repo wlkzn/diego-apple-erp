@@ -125,6 +125,7 @@ model Sale {
   downPayment       Float                  @default(0)
   paymentMethod     String                 // PIX, DINHEIRO, CARTAO, BOLETO, PARCELADO_LOJA
   installmentCount  Int                    @default(1)
+  surchargeAmount   Float                  @default(0) // Acréscimo (juros/taxa) sobre o valor parcelado
   tradeInAmount     Float                  @default(0) // Valor do aparelho recebido em trade-in
   signedContractUrl String?                // Link do PDF do contrato assinado carregado pelo usuário
   status            SaleStatus             @default(ACTIVE)

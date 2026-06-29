@@ -67,6 +67,7 @@ export async function POST(request: Request) {
       customerId,
       items, // array of { productId, quantity, price }
       discountAmount = 0,
+      surchargeAmount = 0,
       downPayment = 0,
       paymentMethod,
       installmentCount = 1,
@@ -121,7 +122,7 @@ export async function POST(request: Request) {
       }
 
       const tradeInAmount = body.tradeIn ? parseFloat(body.tradeIn.evaluationPrice) || 0 : 0;
-      const netAmount = Math.max(totalAmount - discountAmount - tradeInAmount, 0);
+      const netAmount = Math.max(totalAmount - discountAmount - tradeInAmount + surchargeAmount, 0);
 
       // 3. Criar a venda (Sale)
       const sale = await tx.sale.create({
@@ -129,6 +130,7 @@ export async function POST(request: Request) {
           customerId,
           totalAmount,
           discountAmount,
+          surchargeAmount,
           netAmount,
           downPayment,
           paymentMethod,

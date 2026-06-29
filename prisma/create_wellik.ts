@@ -2,16 +2,24 @@ import "dotenv/config";
 import { PrismaClient } from "../src/generated/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
+import * as bcrypt from "bcryptjs";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
 
 async function main() {
-  const user = await prisma.user.update({
+  const hash = await bcrypt.hash("wlkzn", 10);
+  const user = await prisma.user.upsert({
     where: { email: "wellikc.leal@zenix.com" },
-    data: { role: "DEV" },
+    update: { role: "DEV", password: hash },
+    create: {
+      name: "Wellik Leal",
+      email: "wellikc.leal@zenix.com",
+      password: hash,
+      role: "DEV",
+    },
   });
-  console.log("Atualizado:", user.name, "| Função:", user.role);
+  console.log("Usuário DEV garantido:", user.email);
 }
 
 main()

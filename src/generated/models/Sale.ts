@@ -33,6 +33,7 @@ export type SaleAvgAggregateOutputType = {
   netAmount: number | null
   downPayment: number | null
   installmentCount: number | null
+  surchargeAmount: number | null
   tradeInAmount: number | null
 }
 
@@ -43,6 +44,7 @@ export type SaleSumAggregateOutputType = {
   netAmount: number | null
   downPayment: number | null
   installmentCount: number | null
+  surchargeAmount: number | null
   tradeInAmount: number | null
 }
 
@@ -56,6 +58,7 @@ export type SaleMinAggregateOutputType = {
   downPayment: number | null
   paymentMethod: string | null
   installmentCount: number | null
+  surchargeAmount: number | null
   tradeInAmount: number | null
   signedContractUrl: string | null
   status: $Enums.SaleStatus | null
@@ -75,6 +78,7 @@ export type SaleMaxAggregateOutputType = {
   downPayment: number | null
   paymentMethod: string | null
   installmentCount: number | null
+  surchargeAmount: number | null
   tradeInAmount: number | null
   signedContractUrl: string | null
   status: $Enums.SaleStatus | null
@@ -94,6 +98,7 @@ export type SaleCountAggregateOutputType = {
   downPayment: number
   paymentMethod: number
   installmentCount: number
+  surchargeAmount: number
   tradeInAmount: number
   signedContractUrl: number
   status: number
@@ -112,6 +117,7 @@ export type SaleAvgAggregateInputType = {
   netAmount?: true
   downPayment?: true
   installmentCount?: true
+  surchargeAmount?: true
   tradeInAmount?: true
 }
 
@@ -122,6 +128,7 @@ export type SaleSumAggregateInputType = {
   netAmount?: true
   downPayment?: true
   installmentCount?: true
+  surchargeAmount?: true
   tradeInAmount?: true
 }
 
@@ -135,6 +142,7 @@ export type SaleMinAggregateInputType = {
   downPayment?: true
   paymentMethod?: true
   installmentCount?: true
+  surchargeAmount?: true
   tradeInAmount?: true
   signedContractUrl?: true
   status?: true
@@ -154,6 +162,7 @@ export type SaleMaxAggregateInputType = {
   downPayment?: true
   paymentMethod?: true
   installmentCount?: true
+  surchargeAmount?: true
   tradeInAmount?: true
   signedContractUrl?: true
   status?: true
@@ -173,6 +182,7 @@ export type SaleCountAggregateInputType = {
   downPayment?: true
   paymentMethod?: true
   installmentCount?: true
+  surchargeAmount?: true
   tradeInAmount?: true
   signedContractUrl?: true
   status?: true
@@ -279,6 +289,7 @@ export type SaleGroupByOutputType = {
   downPayment: number
   paymentMethod: string
   installmentCount: number
+  surchargeAmount: number
   tradeInAmount: number
   signedContractUrl: string | null
   status: $Enums.SaleStatus
@@ -321,6 +332,7 @@ export type SaleWhereInput = {
   downPayment?: Prisma.FloatFilter<"Sale"> | number
   paymentMethod?: Prisma.StringFilter<"Sale"> | string
   installmentCount?: Prisma.IntFilter<"Sale"> | number
+  surchargeAmount?: Prisma.FloatFilter<"Sale"> | number
   tradeInAmount?: Prisma.FloatFilter<"Sale"> | number
   signedContractUrl?: Prisma.StringNullableFilter<"Sale"> | string | null
   status?: Prisma.EnumSaleStatusFilter<"Sale"> | $Enums.SaleStatus
@@ -345,6 +357,7 @@ export type SaleOrderByWithRelationInput = {
   downPayment?: Prisma.SortOrder
   paymentMethod?: Prisma.SortOrder
   installmentCount?: Prisma.SortOrder
+  surchargeAmount?: Prisma.SortOrder
   tradeInAmount?: Prisma.SortOrder
   signedContractUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -372,6 +385,7 @@ export type SaleWhereUniqueInput = Prisma.AtLeast<{
   downPayment?: Prisma.FloatFilter<"Sale"> | number
   paymentMethod?: Prisma.StringFilter<"Sale"> | string
   installmentCount?: Prisma.IntFilter<"Sale"> | number
+  surchargeAmount?: Prisma.FloatFilter<"Sale"> | number
   tradeInAmount?: Prisma.FloatFilter<"Sale"> | number
   signedContractUrl?: Prisma.StringNullableFilter<"Sale"> | string | null
   status?: Prisma.EnumSaleStatusFilter<"Sale"> | $Enums.SaleStatus
@@ -396,6 +410,7 @@ export type SaleOrderByWithAggregationInput = {
   downPayment?: Prisma.SortOrder
   paymentMethod?: Prisma.SortOrder
   installmentCount?: Prisma.SortOrder
+  surchargeAmount?: Prisma.SortOrder
   tradeInAmount?: Prisma.SortOrder
   signedContractUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -423,6 +438,7 @@ export type SaleScalarWhereWithAggregatesInput = {
   downPayment?: Prisma.FloatWithAggregatesFilter<"Sale"> | number
   paymentMethod?: Prisma.StringWithAggregatesFilter<"Sale"> | string
   installmentCount?: Prisma.IntWithAggregatesFilter<"Sale"> | number
+  surchargeAmount?: Prisma.FloatWithAggregatesFilter<"Sale"> | number
   tradeInAmount?: Prisma.FloatWithAggregatesFilter<"Sale"> | number
   signedContractUrl?: Prisma.StringNullableWithAggregatesFilter<"Sale"> | string | null
   status?: Prisma.EnumSaleStatusWithAggregatesFilter<"Sale"> | $Enums.SaleStatus
@@ -441,6 +457,7 @@ export type SaleCreateInput = {
   downPayment?: number
   paymentMethod: string
   installmentCount?: number
+  surchargeAmount?: number
   tradeInAmount?: number
   signedContractUrl?: string | null
   status?: $Enums.SaleStatus
@@ -465,6 +482,7 @@ export type SaleUncheckedCreateInput = {
   downPayment?: number
   paymentMethod: string
   installmentCount?: number
+  surchargeAmount?: number
   tradeInAmount?: number
   signedContractUrl?: string | null
   status?: $Enums.SaleStatus
@@ -486,6 +504,7 @@ export type SaleUpdateInput = {
   downPayment?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentMethod?: Prisma.StringFieldUpdateOperationsInput | string
   installmentCount?: Prisma.IntFieldUpdateOperationsInput | number
+  surchargeAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   tradeInAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   signedContractUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSaleStatusFieldUpdateOperationsInput | $Enums.SaleStatus
@@ -510,6 +529,7 @@ export type SaleUncheckedUpdateInput = {
   downPayment?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentMethod?: Prisma.StringFieldUpdateOperationsInput | string
   installmentCount?: Prisma.IntFieldUpdateOperationsInput | number
+  surchargeAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   tradeInAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   signedContractUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSaleStatusFieldUpdateOperationsInput | $Enums.SaleStatus
@@ -533,6 +553,7 @@ export type SaleCreateManyInput = {
   downPayment?: number
   paymentMethod: string
   installmentCount?: number
+  surchargeAmount?: number
   tradeInAmount?: number
   signedContractUrl?: string | null
   status?: $Enums.SaleStatus
@@ -550,6 +571,7 @@ export type SaleUpdateManyMutationInput = {
   downPayment?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentMethod?: Prisma.StringFieldUpdateOperationsInput | string
   installmentCount?: Prisma.IntFieldUpdateOperationsInput | number
+  surchargeAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   tradeInAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   signedContractUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSaleStatusFieldUpdateOperationsInput | $Enums.SaleStatus
@@ -569,6 +591,7 @@ export type SaleUncheckedUpdateManyInput = {
   downPayment?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentMethod?: Prisma.StringFieldUpdateOperationsInput | string
   installmentCount?: Prisma.IntFieldUpdateOperationsInput | number
+  surchargeAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   tradeInAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   signedContractUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSaleStatusFieldUpdateOperationsInput | $Enums.SaleStatus
@@ -598,6 +621,7 @@ export type SaleCountOrderByAggregateInput = {
   downPayment?: Prisma.SortOrder
   paymentMethod?: Prisma.SortOrder
   installmentCount?: Prisma.SortOrder
+  surchargeAmount?: Prisma.SortOrder
   tradeInAmount?: Prisma.SortOrder
   signedContractUrl?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -614,6 +638,7 @@ export type SaleAvgOrderByAggregateInput = {
   netAmount?: Prisma.SortOrder
   downPayment?: Prisma.SortOrder
   installmentCount?: Prisma.SortOrder
+  surchargeAmount?: Prisma.SortOrder
   tradeInAmount?: Prisma.SortOrder
 }
 
@@ -627,6 +652,7 @@ export type SaleMaxOrderByAggregateInput = {
   downPayment?: Prisma.SortOrder
   paymentMethod?: Prisma.SortOrder
   installmentCount?: Prisma.SortOrder
+  surchargeAmount?: Prisma.SortOrder
   tradeInAmount?: Prisma.SortOrder
   signedContractUrl?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -646,6 +672,7 @@ export type SaleMinOrderByAggregateInput = {
   downPayment?: Prisma.SortOrder
   paymentMethod?: Prisma.SortOrder
   installmentCount?: Prisma.SortOrder
+  surchargeAmount?: Prisma.SortOrder
   tradeInAmount?: Prisma.SortOrder
   signedContractUrl?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -662,6 +689,7 @@ export type SaleSumOrderByAggregateInput = {
   netAmount?: Prisma.SortOrder
   downPayment?: Prisma.SortOrder
   installmentCount?: Prisma.SortOrder
+  surchargeAmount?: Prisma.SortOrder
   tradeInAmount?: Prisma.SortOrder
 }
 
@@ -788,6 +816,7 @@ export type SaleCreateWithoutCustomerInput = {
   downPayment?: number
   paymentMethod: string
   installmentCount?: number
+  surchargeAmount?: number
   tradeInAmount?: number
   signedContractUrl?: string | null
   status?: $Enums.SaleStatus
@@ -810,6 +839,7 @@ export type SaleUncheckedCreateWithoutCustomerInput = {
   downPayment?: number
   paymentMethod: string
   installmentCount?: number
+  surchargeAmount?: number
   tradeInAmount?: number
   signedContractUrl?: string | null
   status?: $Enums.SaleStatus
@@ -862,6 +892,7 @@ export type SaleScalarWhereInput = {
   downPayment?: Prisma.FloatFilter<"Sale"> | number
   paymentMethod?: Prisma.StringFilter<"Sale"> | string
   installmentCount?: Prisma.IntFilter<"Sale"> | number
+  surchargeAmount?: Prisma.FloatFilter<"Sale"> | number
   tradeInAmount?: Prisma.FloatFilter<"Sale"> | number
   signedContractUrl?: Prisma.StringNullableFilter<"Sale"> | string | null
   status?: Prisma.EnumSaleStatusFilter<"Sale"> | $Enums.SaleStatus
@@ -880,6 +911,7 @@ export type SaleCreateWithoutItemsInput = {
   downPayment?: number
   paymentMethod: string
   installmentCount?: number
+  surchargeAmount?: number
   tradeInAmount?: number
   signedContractUrl?: string | null
   status?: $Enums.SaleStatus
@@ -903,6 +935,7 @@ export type SaleUncheckedCreateWithoutItemsInput = {
   downPayment?: number
   paymentMethod: string
   installmentCount?: number
+  surchargeAmount?: number
   tradeInAmount?: number
   signedContractUrl?: string | null
   status?: $Enums.SaleStatus
@@ -939,6 +972,7 @@ export type SaleUpdateWithoutItemsInput = {
   downPayment?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentMethod?: Prisma.StringFieldUpdateOperationsInput | string
   installmentCount?: Prisma.IntFieldUpdateOperationsInput | number
+  surchargeAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   tradeInAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   signedContractUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSaleStatusFieldUpdateOperationsInput | $Enums.SaleStatus
@@ -962,6 +996,7 @@ export type SaleUncheckedUpdateWithoutItemsInput = {
   downPayment?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentMethod?: Prisma.StringFieldUpdateOperationsInput | string
   installmentCount?: Prisma.IntFieldUpdateOperationsInput | number
+  surchargeAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   tradeInAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   signedContractUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSaleStatusFieldUpdateOperationsInput | $Enums.SaleStatus
@@ -983,6 +1018,7 @@ export type SaleCreateWithoutInstallmentsInput = {
   downPayment?: number
   paymentMethod: string
   installmentCount?: number
+  surchargeAmount?: number
   tradeInAmount?: number
   signedContractUrl?: string | null
   status?: $Enums.SaleStatus
@@ -1006,6 +1042,7 @@ export type SaleUncheckedCreateWithoutInstallmentsInput = {
   downPayment?: number
   paymentMethod: string
   installmentCount?: number
+  surchargeAmount?: number
   tradeInAmount?: number
   signedContractUrl?: string | null
   status?: $Enums.SaleStatus
@@ -1042,6 +1079,7 @@ export type SaleUpdateWithoutInstallmentsInput = {
   downPayment?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentMethod?: Prisma.StringFieldUpdateOperationsInput | string
   installmentCount?: Prisma.IntFieldUpdateOperationsInput | number
+  surchargeAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   tradeInAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   signedContractUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSaleStatusFieldUpdateOperationsInput | $Enums.SaleStatus
@@ -1065,6 +1103,7 @@ export type SaleUncheckedUpdateWithoutInstallmentsInput = {
   downPayment?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentMethod?: Prisma.StringFieldUpdateOperationsInput | string
   installmentCount?: Prisma.IntFieldUpdateOperationsInput | number
+  surchargeAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   tradeInAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   signedContractUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSaleStatusFieldUpdateOperationsInput | $Enums.SaleStatus
@@ -1086,6 +1125,7 @@ export type SaleCreateWithoutTransactionsInput = {
   downPayment?: number
   paymentMethod: string
   installmentCount?: number
+  surchargeAmount?: number
   tradeInAmount?: number
   signedContractUrl?: string | null
   status?: $Enums.SaleStatus
@@ -1109,6 +1149,7 @@ export type SaleUncheckedCreateWithoutTransactionsInput = {
   downPayment?: number
   paymentMethod: string
   installmentCount?: number
+  surchargeAmount?: number
   tradeInAmount?: number
   signedContractUrl?: string | null
   status?: $Enums.SaleStatus
@@ -1145,6 +1186,7 @@ export type SaleUpdateWithoutTransactionsInput = {
   downPayment?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentMethod?: Prisma.StringFieldUpdateOperationsInput | string
   installmentCount?: Prisma.IntFieldUpdateOperationsInput | number
+  surchargeAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   tradeInAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   signedContractUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSaleStatusFieldUpdateOperationsInput | $Enums.SaleStatus
@@ -1168,6 +1210,7 @@ export type SaleUncheckedUpdateWithoutTransactionsInput = {
   downPayment?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentMethod?: Prisma.StringFieldUpdateOperationsInput | string
   installmentCount?: Prisma.IntFieldUpdateOperationsInput | number
+  surchargeAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   tradeInAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   signedContractUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSaleStatusFieldUpdateOperationsInput | $Enums.SaleStatus
@@ -1189,6 +1232,7 @@ export type SaleCreateWithoutTradeInDeviceInput = {
   downPayment?: number
   paymentMethod: string
   installmentCount?: number
+  surchargeAmount?: number
   tradeInAmount?: number
   signedContractUrl?: string | null
   status?: $Enums.SaleStatus
@@ -1212,6 +1256,7 @@ export type SaleUncheckedCreateWithoutTradeInDeviceInput = {
   downPayment?: number
   paymentMethod: string
   installmentCount?: number
+  surchargeAmount?: number
   tradeInAmount?: number
   signedContractUrl?: string | null
   status?: $Enums.SaleStatus
@@ -1248,6 +1293,7 @@ export type SaleUpdateWithoutTradeInDeviceInput = {
   downPayment?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentMethod?: Prisma.StringFieldUpdateOperationsInput | string
   installmentCount?: Prisma.IntFieldUpdateOperationsInput | number
+  surchargeAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   tradeInAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   signedContractUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSaleStatusFieldUpdateOperationsInput | $Enums.SaleStatus
@@ -1271,6 +1317,7 @@ export type SaleUncheckedUpdateWithoutTradeInDeviceInput = {
   downPayment?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentMethod?: Prisma.StringFieldUpdateOperationsInput | string
   installmentCount?: Prisma.IntFieldUpdateOperationsInput | number
+  surchargeAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   tradeInAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   signedContractUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSaleStatusFieldUpdateOperationsInput | $Enums.SaleStatus
@@ -1292,6 +1339,7 @@ export type SaleCreateManyCustomerInput = {
   downPayment?: number
   paymentMethod: string
   installmentCount?: number
+  surchargeAmount?: number
   tradeInAmount?: number
   signedContractUrl?: string | null
   status?: $Enums.SaleStatus
@@ -1309,6 +1357,7 @@ export type SaleUpdateWithoutCustomerInput = {
   downPayment?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentMethod?: Prisma.StringFieldUpdateOperationsInput | string
   installmentCount?: Prisma.IntFieldUpdateOperationsInput | number
+  surchargeAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   tradeInAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   signedContractUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSaleStatusFieldUpdateOperationsInput | $Enums.SaleStatus
@@ -1331,6 +1380,7 @@ export type SaleUncheckedUpdateWithoutCustomerInput = {
   downPayment?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentMethod?: Prisma.StringFieldUpdateOperationsInput | string
   installmentCount?: Prisma.IntFieldUpdateOperationsInput | number
+  surchargeAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   tradeInAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   signedContractUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSaleStatusFieldUpdateOperationsInput | $Enums.SaleStatus
@@ -1353,6 +1403,7 @@ export type SaleUncheckedUpdateManyWithoutCustomerInput = {
   downPayment?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentMethod?: Prisma.StringFieldUpdateOperationsInput | string
   installmentCount?: Prisma.IntFieldUpdateOperationsInput | number
+  surchargeAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   tradeInAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   signedContractUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSaleStatusFieldUpdateOperationsInput | $Enums.SaleStatus
@@ -1421,6 +1472,7 @@ export type SaleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   downPayment?: boolean
   paymentMethod?: boolean
   installmentCount?: boolean
+  surchargeAmount?: boolean
   tradeInAmount?: boolean
   signedContractUrl?: boolean
   status?: boolean
@@ -1446,6 +1498,7 @@ export type SaleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   downPayment?: boolean
   paymentMethod?: boolean
   installmentCount?: boolean
+  surchargeAmount?: boolean
   tradeInAmount?: boolean
   signedContractUrl?: boolean
   status?: boolean
@@ -1466,6 +1519,7 @@ export type SaleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   downPayment?: boolean
   paymentMethod?: boolean
   installmentCount?: boolean
+  surchargeAmount?: boolean
   tradeInAmount?: boolean
   signedContractUrl?: boolean
   status?: boolean
@@ -1486,6 +1540,7 @@ export type SaleSelectScalar = {
   downPayment?: boolean
   paymentMethod?: boolean
   installmentCount?: boolean
+  surchargeAmount?: boolean
   tradeInAmount?: boolean
   signedContractUrl?: boolean
   status?: boolean
@@ -1495,7 +1550,7 @@ export type SaleSelectScalar = {
   updatedAt?: boolean
 }
 
-export type SaleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "saleNumber" | "customerId" | "totalAmount" | "discountAmount" | "netAmount" | "downPayment" | "paymentMethod" | "installmentCount" | "tradeInAmount" | "signedContractUrl" | "status" | "cancelledAt" | "cancelReason" | "createdAt" | "updatedAt", ExtArgs["result"]["sale"]>
+export type SaleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "saleNumber" | "customerId" | "totalAmount" | "discountAmount" | "netAmount" | "downPayment" | "paymentMethod" | "installmentCount" | "surchargeAmount" | "tradeInAmount" | "signedContractUrl" | "status" | "cancelledAt" | "cancelReason" | "createdAt" | "updatedAt", ExtArgs["result"]["sale"]>
 export type SaleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   customer?: boolean | Prisma.CustomerDefaultArgs<ExtArgs>
   items?: boolean | Prisma.Sale$itemsArgs<ExtArgs>
@@ -1530,6 +1585,7 @@ export type $SalePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     downPayment: number
     paymentMethod: string
     installmentCount: number
+    surchargeAmount: number
     tradeInAmount: number
     signedContractUrl: string | null
     status: $Enums.SaleStatus
@@ -1974,6 +2030,7 @@ export interface SaleFieldRefs {
   readonly downPayment: Prisma.FieldRef<"Sale", 'Float'>
   readonly paymentMethod: Prisma.FieldRef<"Sale", 'String'>
   readonly installmentCount: Prisma.FieldRef<"Sale", 'Int'>
+  readonly surchargeAmount: Prisma.FieldRef<"Sale", 'Float'>
   readonly tradeInAmount: Prisma.FieldRef<"Sale", 'Float'>
   readonly signedContractUrl: Prisma.FieldRef<"Sale", 'String'>
   readonly status: Prisma.FieldRef<"Sale", 'SaleStatus'>

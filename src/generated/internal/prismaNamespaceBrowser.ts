@@ -154,6 +154,7 @@ export const SaleScalarFieldEnum = {
   downPayment: 'downPayment',
   paymentMethod: 'paymentMethod',
   installmentCount: 'installmentCount',
+  surchargeAmount: 'surchargeAmount',
   tradeInAmount: 'tradeInAmount',
   signedContractUrl: 'signedContractUrl',
   status: 'status',

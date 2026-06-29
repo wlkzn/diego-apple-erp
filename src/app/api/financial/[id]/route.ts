@@ -11,6 +11,15 @@ async function getAuthUserId() {
   return decoded ? decoded.userId : null;
 }
 
+async function getAuthUser() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+  if (!token) return null;
+  const decoded = verifyToken(token);
+  if (!decoded) return null;
+  return prisma.user.findUnique({ where: { id: decoded.userId } });
+}
+
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -74,14 +83,18 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = await getAuthUserId();
-    if (!userId) {
+    const user = await getAuthUser();
+    if (!user) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
+    if (user.role !== "ADMIN" && user.role !== "DEV") {
+      return NextResponse.json({ error: "Apenas administradores podem excluir lançamentos." }, { status: 403 });
+    }
+    const userId = user.id;
 
     const { id } = await params;
 

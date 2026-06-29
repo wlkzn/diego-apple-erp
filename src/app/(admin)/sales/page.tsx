@@ -18,6 +18,7 @@ import {
   User,
   XCircle,
   AlertTriangle,
+  Trash2,
 } from "lucide-react";
 
 interface Sale {
@@ -61,6 +62,37 @@ export default function SalesHistoryPage() {
   const [cancelTarget, setCancelTarget] = useState<{ id: string; saleNumber: number } | null>(null);
   const [cancelReason, setCancelReason] = useState("");
   const [isCancelling, setIsCancelling] = useState(false);
+
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; saleNumber: number } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((d) => { if (d.user) setUserRole(d.user.role); })
+      .catch(() => {});
+  }, []);
+
+  const handleDeleteSale = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/sales/${deleteTarget.id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (res.ok) {
+        showToast(data.message, "success");
+        setDeleteTarget(null);
+        loadSales();
+      } else {
+        showToast(data.error || "Erro ao excluir venda", "error");
+      }
+    } catch {
+      showToast("Erro de conexão", "error");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const loadSales = useCallback(async () => {
     setIsLoading(true);
@@ -170,6 +202,51 @@ export default function SalesHistoryPage() {
 
   return (
     <div className="space-y-8 select-none">
+
+      {/* ── Modal de Exclusão Definitiva ── */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center flex-shrink-0">
+                <Trash2 className="w-5 h-5 text-red-500" />
+              </div>
+              <div>
+                <h2 className="font-bold text-foreground">Excluir Venda #{String(deleteTarget.saleNumber).padStart(5, "0")} permanentemente?</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">Esta ação é irreversível. Todos os registros vinculados serão removidos.</p>
+              </div>
+            </div>
+
+            <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-3 text-xs text-red-600 dark:text-red-400 space-y-1">
+              <p className="font-bold">Serão excluídos permanentemente:</p>
+              <ul className="list-disc pl-4 space-y-0.5 text-muted-foreground">
+                <li>Venda, itens e parcelas</li>
+                <li>Transações financeiras vinculadas</li>
+                <li>Trade-in e produto recebido (se não vendido)</li>
+                <li>Contrato e histórico da venda</li>
+              </ul>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2.5 border border-border text-foreground rounded-xl text-sm font-semibold hover:bg-muted/50 transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDeleteSale}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl text-sm font-bold hover:bg-red-700 transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
+              >
+                {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                {isDeleting ? "Excluindo..." : "Excluir Definitivamente"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Modal de Cancelamento ── */}
       {cancelTarget && (
@@ -411,22 +488,34 @@ export default function SalesHistoryPage() {
                       </div>
                     </td>
 
-                    {/* Cancelar */}
+                    {/* Ações Admin */}
                     <td className="px-6 py-4 text-center">
-                      {s.status === "ACTIVE" ? (
-                        <button
-                          onClick={() => setCancelTarget({ id: s.id, saleNumber: s.saleNumber })}
-                          className="flex items-center gap-1 px-2.5 py-1.5 border border-red-500/30 text-red-500 hover:bg-red-500/10 text-xs font-semibold rounded-lg cursor-pointer transition-colors mx-auto"
-                          title="Cancelar esta venda"
-                        >
-                          <XCircle className="w-3.5 h-3.5" />
-                          <span>Cancelar</span>
-                        </button>
-                      ) : (
-                        <span className="text-[10px] text-muted-foreground italic">
-                          {s.cancelledAt ? new Date(s.cancelledAt).toLocaleDateString("pt-BR") : "—"}
-                        </span>
-                      )}
+                      <div className="flex items-center justify-center gap-1.5">
+                        {s.status === "ACTIVE" && (
+                          <button
+                            onClick={() => setCancelTarget({ id: s.id, saleNumber: s.saleNumber })}
+                            className="flex items-center gap-1 px-2.5 py-1.5 border border-red-500/30 text-red-500 hover:bg-red-500/10 text-xs font-semibold rounded-lg cursor-pointer transition-colors"
+                            title="Cancelar esta venda"
+                          >
+                            <XCircle className="w-3.5 h-3.5" />
+                            <span>Cancelar</span>
+                          </button>
+                        )}
+                        {s.status === "CANCELLED" && (
+                          <span className="text-[10px] text-muted-foreground italic">
+                            {s.cancelledAt ? new Date(s.cancelledAt).toLocaleDateString("pt-BR") : "—"}
+                          </span>
+                        )}
+                        {(userRole === "ADMIN" || userRole === "DEV") && (
+                          <button
+                            onClick={() => setDeleteTarget({ id: s.id, saleNumber: s.saleNumber })}
+                            className="p-1.5 border border-red-500/20 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded-lg cursor-pointer transition-colors"
+                            title="Excluir permanentemente"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
                     </td>
 
                   </tr>
