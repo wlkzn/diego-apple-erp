@@ -59,7 +59,10 @@ export async function GET(request: Request) {
       },
     });
 
-    // Calcular agregados
+    // Calcular agregados (Para pendentes, mostramos o total global, ignorando filtro de data)
+    const pendingWhere = { ...whereClause };
+    delete pendingWhere.date;
+
     const paidInflows = await prisma.financialTransaction.aggregate({
       where: { ...whereClause, type: "INFLOW", status: "PAID" },
       _sum: { amount: true },
@@ -71,12 +74,12 @@ export async function GET(request: Request) {
     });
 
     const pendingInflows = await prisma.financialTransaction.aggregate({
-      where: { ...whereClause, type: "INFLOW", status: { in: ["PENDING", "OVERDUE"] } },
+      where: { ...pendingWhere, type: "INFLOW", status: { in: ["PENDING", "OVERDUE"] } },
       _sum: { amount: true },
     });
 
     const pendingOutflows = await prisma.financialTransaction.aggregate({
-      where: { ...whereClause, type: "OUTFLOW", status: { in: ["PENDING", "OVERDUE"] } },
+      where: { ...pendingWhere, type: "OUTFLOW", status: { in: ["PENDING", "OVERDUE"] } },
       _sum: { amount: true },
     });
 

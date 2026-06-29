@@ -26,6 +26,7 @@ interface Sale {
   saleNumber: number;
   totalAmount: number;
   discountAmount: number;
+  surchargeAmount: number;
   netAmount: number;
   downPayment: number;
   paymentMethod: string;
@@ -391,8 +392,15 @@ export default function SalesHistoryPage() {
                     </td>
 
                     {/* Total */}
-                    <td className="px-6 py-4 font-extrabold text-foreground">
-                      {formatBRL(s.netAmount)}
+                    <td className="px-6 py-4">
+                      <div className="font-extrabold text-foreground">
+                        {formatBRL(s.netAmount)}
+                      </div>
+                      {s.surchargeAmount > 0 && (
+                        <div className="text-[10px] text-muted-foreground mt-0.5" title="Juros/Acréscimo aplicado">
+                          (Inclui {formatBRL(s.surchargeAmount)} juros)
+                        </div>
+                      )}
                     </td>
 
                     {/* Upload / Status Contrato Assinado */}
