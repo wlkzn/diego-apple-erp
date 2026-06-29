@@ -60,6 +60,7 @@ export async function GET(request: Request) {
         MetodoPagamento: s.paymentMethod,
         TotalBruto: s.totalAmount,
         Desconto: s.discountAmount,
+        Acrescimo: s.surchargeAmount || 0,
         TotalLiquido: s.netAmount,
         Entrada: s.downPayment,
         Parcelas: s.installmentCount,

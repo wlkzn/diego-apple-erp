@@ -130,7 +130,7 @@ export default function ReportsPage() {
   // Retornar cabeçalhos legíveis para a tabela
   const getTableHeaders = () => {
     if (reportType === "sales") {
-      return ["Venda Nº", "Cliente", "CPF", "Data", "Pagamento", "Total Bruto", "Desconto", "Total Líquido", "Entrada", "Parc."];
+      return ["Venda Nº", "Cliente", "CPF", "Data", "Pagamento", "Total Bruto", "Desconto", "Acréscimo", "Total Líquido", "Entrada", "Parc."];
     }
     if (reportType === "products") {
       return ["ID", "Marca", "Modelo", "Cor", "Armazenamento", "IMEI", "S/N", "Custo", "Venda", "Lucro", "Qtd", "Status"];
@@ -329,6 +329,7 @@ export default function ReportsPage() {
                             key.toLowerCase().includes("valor") ||
                             key.toLowerCase().includes("total") ||
                             key.toLowerCase().includes("desconto") ||
+                            key.toLowerCase().includes("acrescimo") ||
                             key.toLowerCase().includes("entrada") ||
                             key.toLowerCase().includes("gasto") ||
                             key.toLowerCase().includes("devedor") ||
