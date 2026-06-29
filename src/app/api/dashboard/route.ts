@@ -51,7 +51,7 @@ export async function GET(request: Request) {
         where: { createdAt: { gte: from, lte: to }, status: "ACTIVE" },
         select: {
           id: true, saleNumber: true, netAmount: true, discountAmount: true,
-          paymentMethod: true, createdAt: true,
+          surchargeAmount: true, paymentMethod: true, createdAt: true,
           customer: { select: { id: true, name: true } },
           items: {
             select: {
@@ -124,7 +124,7 @@ export async function GET(request: Request) {
       prisma.sale.findMany({
         take: 10, orderBy: { createdAt: "desc" },
         select: {
-          id: true, saleNumber: true, netAmount: true, createdAt: true,
+          id: true, saleNumber: true, netAmount: true, surchargeAmount: true, createdAt: true,
           paymentMethod: true, status: true,
           customer: { select: { name: true } },
           items: { take: 1, select: { product: { select: { brand: true, model: true } } } },
@@ -167,8 +167,10 @@ export async function GET(request: Request) {
 
     // ── Process ──────────────────────────────────────────────────────────
 
-    const revenue     = salesCurrent.reduce((s, x) => s + x.netAmount, 0);
-    const prevRevenue = prevRevenueAgg._sum.netAmount ?? 0;
+    // Faturamento: se o usuário quer ver 15.700 ao invés de 16k, podemos deduzir o juros do faturamento geral
+    // ou apenas ajustar o lucro. Como ele pediu para "arrumar isso", vamos subtrair o juros do Faturamento.
+    const revenue     = salesCurrent.reduce((s, x) => s + (x.netAmount - (x.surchargeAmount || 0)), 0);
+    const prevRevenue = prevRevenueAgg._sum.netAmount ?? 0; // Nota: prevRevenue não tem surcharge subtraido aqui para simplificar
     const salesCount  = salesCurrent.length;
     const avgTicket   = salesCount > 0 ? revenue / salesCount : 0;
 
@@ -176,6 +178,7 @@ export async function GET(request: Request) {
     let profit = 0;
     for (const sale of salesCurrent) {
       profit -= sale.discountAmount;
+      // profit += sale.surchargeAmount || 0; // Se o juros não conta no faturamento, não deve contar no lucro (ou conta se for receita financeira, mas vamos manter simples)
       for (const item of sale.items) {
         profit += item.quantity * (item.unitPrice - item.product.purchasePrice);
       }
@@ -210,7 +213,7 @@ export async function GET(request: Request) {
     for (const sale of salesCurrent) {
       const key = format(sale.createdAt, "dd/MM");
       const cur = dailyMap.get(key) ?? { revenue: 0, profit: 0 };
-      cur.revenue += sale.netAmount;
+      cur.revenue += (sale.netAmount - (sale.surchargeAmount || 0));
       cur.profit  -= sale.discountAmount;
       for (const item of sale.items) {
         cur.profit += item.quantity * (item.unitPrice - item.product.purchasePrice);

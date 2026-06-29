@@ -82,19 +82,20 @@ export default function SettingsPage() {
       if (res.ok) {
         const data = await res.json();
         const s = data.settings;
-        setTipo(s.tipo || "PJ");
+        const loadedTipo = s.tipo || "PJ";
+        setTipo(loadedTipo);
         setCompanyName(s.name || "");
         setTradeName(s.tradeName || "");
-        setCnpj(s.cnpj || "");
+        setCnpj(loadedTipo === "PF" ? maskCPF(s.cnpj || "") : maskCNPJ(s.cnpj || ""));
         setRg(s.rg || "");
         setIe(s.ie || "");
         setAddress(s.address || "");
         setNeighborhood(s.neighborhood || "");
         setCity(s.city || "");
         setState(s.state || "");
-        setCep(s.cep || "");
-        setPhone(s.phone || "");
-        setWhatsApp(s.whatsApp || "");
+        setCep(maskCEP(s.cep || ""));
+        setPhone(maskPhone(s.phone || ""));
+        setWhatsApp(s.whatsApp ? maskPhone(s.whatsApp) : "");
         setEmail(s.email || "");
         setLogoUrl(s.logoUrl || "");
       }
