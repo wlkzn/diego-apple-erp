@@ -204,6 +204,7 @@ model CompanySetting {
   rg            String?  // RG - somente para PF
   ie            String?  // Inscrição Estadual - somente para PJ
   address       String
+  neighborhood  String?  // Bairro
   city          String?
   state         String?
   cep           String?

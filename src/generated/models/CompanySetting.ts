@@ -33,6 +33,7 @@ export type CompanySettingMinAggregateOutputType = {
   rg: string | null
   ie: string | null
   address: string | null
+  neighborhood: string | null
   city: string | null
   state: string | null
   cep: string | null
@@ -54,6 +55,7 @@ export type CompanySettingMaxAggregateOutputType = {
   rg: string | null
   ie: string | null
   address: string | null
+  neighborhood: string | null
   city: string | null
   state: string | null
   cep: string | null
@@ -75,6 +77,7 @@ export type CompanySettingCountAggregateOutputType = {
   rg: number
   ie: number
   address: number
+  neighborhood: number
   city: number
   state: number
   cep: number
@@ -98,6 +101,7 @@ export type CompanySettingMinAggregateInputType = {
   rg?: true
   ie?: true
   address?: true
+  neighborhood?: true
   city?: true
   state?: true
   cep?: true
@@ -119,6 +123,7 @@ export type CompanySettingMaxAggregateInputType = {
   rg?: true
   ie?: true
   address?: true
+  neighborhood?: true
   city?: true
   state?: true
   cep?: true
@@ -140,6 +145,7 @@ export type CompanySettingCountAggregateInputType = {
   rg?: true
   ie?: true
   address?: true
+  neighborhood?: true
   city?: true
   state?: true
   cep?: true
@@ -234,6 +240,7 @@ export type CompanySettingGroupByOutputType = {
   rg: string | null
   ie: string | null
   address: string
+  neighborhood: string | null
   city: string | null
   state: string | null
   cep: string | null
@@ -276,6 +283,7 @@ export type CompanySettingWhereInput = {
   rg?: Prisma.StringNullableFilter<"CompanySetting"> | string | null
   ie?: Prisma.StringNullableFilter<"CompanySetting"> | string | null
   address?: Prisma.StringFilter<"CompanySetting"> | string
+  neighborhood?: Prisma.StringNullableFilter<"CompanySetting"> | string | null
   city?: Prisma.StringNullableFilter<"CompanySetting"> | string | null
   state?: Prisma.StringNullableFilter<"CompanySetting"> | string | null
   cep?: Prisma.StringNullableFilter<"CompanySetting"> | string | null
@@ -297,6 +305,7 @@ export type CompanySettingOrderByWithRelationInput = {
   rg?: Prisma.SortOrderInput | Prisma.SortOrder
   ie?: Prisma.SortOrderInput | Prisma.SortOrder
   address?: Prisma.SortOrder
+  neighborhood?: Prisma.SortOrderInput | Prisma.SortOrder
   city?: Prisma.SortOrderInput | Prisma.SortOrder
   state?: Prisma.SortOrderInput | Prisma.SortOrder
   cep?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -321,6 +330,7 @@ export type CompanySettingWhereUniqueInput = Prisma.AtLeast<{
   rg?: Prisma.StringNullableFilter<"CompanySetting"> | string | null
   ie?: Prisma.StringNullableFilter<"CompanySetting"> | string | null
   address?: Prisma.StringFilter<"CompanySetting"> | string
+  neighborhood?: Prisma.StringNullableFilter<"CompanySetting"> | string | null
   city?: Prisma.StringNullableFilter<"CompanySetting"> | string | null
   state?: Prisma.StringNullableFilter<"CompanySetting"> | string | null
   cep?: Prisma.StringNullableFilter<"CompanySetting"> | string | null
@@ -342,6 +352,7 @@ export type CompanySettingOrderByWithAggregationInput = {
   rg?: Prisma.SortOrderInput | Prisma.SortOrder
   ie?: Prisma.SortOrderInput | Prisma.SortOrder
   address?: Prisma.SortOrder
+  neighborhood?: Prisma.SortOrderInput | Prisma.SortOrder
   city?: Prisma.SortOrderInput | Prisma.SortOrder
   state?: Prisma.SortOrderInput | Prisma.SortOrder
   cep?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -369,6 +380,7 @@ export type CompanySettingScalarWhereWithAggregatesInput = {
   rg?: Prisma.StringNullableWithAggregatesFilter<"CompanySetting"> | string | null
   ie?: Prisma.StringNullableWithAggregatesFilter<"CompanySetting"> | string | null
   address?: Prisma.StringWithAggregatesFilter<"CompanySetting"> | string
+  neighborhood?: Prisma.StringNullableWithAggregatesFilter<"CompanySetting"> | string | null
   city?: Prisma.StringNullableWithAggregatesFilter<"CompanySetting"> | string | null
   state?: Prisma.StringNullableWithAggregatesFilter<"CompanySetting"> | string | null
   cep?: Prisma.StringNullableWithAggregatesFilter<"CompanySetting"> | string | null
@@ -390,6 +402,7 @@ export type CompanySettingCreateInput = {
   rg?: string | null
   ie?: string | null
   address: string
+  neighborhood?: string | null
   city?: string | null
   state?: string | null
   cep?: string | null
@@ -411,6 +424,7 @@ export type CompanySettingUncheckedCreateInput = {
   rg?: string | null
   ie?: string | null
   address: string
+  neighborhood?: string | null
   city?: string | null
   state?: string | null
   cep?: string | null
@@ -432,6 +446,7 @@ export type CompanySettingUpdateInput = {
   rg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.StringFieldUpdateOperationsInput | string
+  neighborhood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -453,6 +468,7 @@ export type CompanySettingUncheckedUpdateInput = {
   rg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.StringFieldUpdateOperationsInput | string
+  neighborhood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -474,6 +490,7 @@ export type CompanySettingCreateManyInput = {
   rg?: string | null
   ie?: string | null
   address: string
+  neighborhood?: string | null
   city?: string | null
   state?: string | null
   cep?: string | null
@@ -495,6 +512,7 @@ export type CompanySettingUpdateManyMutationInput = {
   rg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.StringFieldUpdateOperationsInput | string
+  neighborhood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -516,6 +534,7 @@ export type CompanySettingUncheckedUpdateManyInput = {
   rg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.StringFieldUpdateOperationsInput | string
+  neighborhood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -537,6 +556,7 @@ export type CompanySettingCountOrderByAggregateInput = {
   rg?: Prisma.SortOrder
   ie?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  neighborhood?: Prisma.SortOrder
   city?: Prisma.SortOrder
   state?: Prisma.SortOrder
   cep?: Prisma.SortOrder
@@ -558,6 +578,7 @@ export type CompanySettingMaxOrderByAggregateInput = {
   rg?: Prisma.SortOrder
   ie?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  neighborhood?: Prisma.SortOrder
   city?: Prisma.SortOrder
   state?: Prisma.SortOrder
   cep?: Prisma.SortOrder
@@ -579,6 +600,7 @@ export type CompanySettingMinOrderByAggregateInput = {
   rg?: Prisma.SortOrder
   ie?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  neighborhood?: Prisma.SortOrder
   city?: Prisma.SortOrder
   state?: Prisma.SortOrder
   cep?: Prisma.SortOrder
@@ -602,6 +624,7 @@ export type CompanySettingSelect<ExtArgs extends runtime.Types.Extensions.Intern
   rg?: boolean
   ie?: boolean
   address?: boolean
+  neighborhood?: boolean
   city?: boolean
   state?: boolean
   cep?: boolean
@@ -623,6 +646,7 @@ export type CompanySettingSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   rg?: boolean
   ie?: boolean
   address?: boolean
+  neighborhood?: boolean
   city?: boolean
   state?: boolean
   cep?: boolean
@@ -644,6 +668,7 @@ export type CompanySettingSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   rg?: boolean
   ie?: boolean
   address?: boolean
+  neighborhood?: boolean
   city?: boolean
   state?: boolean
   cep?: boolean
@@ -665,6 +690,7 @@ export type CompanySettingSelectScalar = {
   rg?: boolean
   ie?: boolean
   address?: boolean
+  neighborhood?: boolean
   city?: boolean
   state?: boolean
   cep?: boolean
@@ -677,7 +703,7 @@ export type CompanySettingSelectScalar = {
   updatedAt?: boolean
 }
 
-export type CompanySettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tipo" | "name" | "tradeName" | "cnpj" | "rg" | "ie" | "address" | "city" | "state" | "cep" | "phone" | "whatsApp" | "email" | "logoUrl" | "contractTerms" | "createdAt" | "updatedAt", ExtArgs["result"]["companySetting"]>
+export type CompanySettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tipo" | "name" | "tradeName" | "cnpj" | "rg" | "ie" | "address" | "neighborhood" | "city" | "state" | "cep" | "phone" | "whatsApp" | "email" | "logoUrl" | "contractTerms" | "createdAt" | "updatedAt", ExtArgs["result"]["companySetting"]>
 
 export type $CompanySettingPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CompanySetting"
@@ -691,6 +717,7 @@ export type $CompanySettingPayload<ExtArgs extends runtime.Types.Extensions.Inte
     rg: string | null
     ie: string | null
     address: string
+    neighborhood: string | null
     city: string | null
     state: string | null
     cep: string | null
@@ -1132,6 +1159,7 @@ export interface CompanySettingFieldRefs {
   readonly rg: Prisma.FieldRef<"CompanySetting", 'String'>
   readonly ie: Prisma.FieldRef<"CompanySetting", 'String'>
   readonly address: Prisma.FieldRef<"CompanySetting", 'String'>
+  readonly neighborhood: Prisma.FieldRef<"CompanySetting", 'String'>
   readonly city: Prisma.FieldRef<"CompanySetting", 'String'>
   readonly state: Prisma.FieldRef<"CompanySetting", 'String'>
   readonly cep: Prisma.FieldRef<"CompanySetting", 'String'>

@@ -11,6 +11,15 @@ async function getAuthUserId() {
   return decoded ? decoded.userId : null;
 }
 
+async function getAuthUser() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+  if (!token) return null;
+  const decoded = verifyToken(token);
+  if (!decoded) return null;
+  return prisma.user.findUnique({ where: { id: decoded.userId } });
+}
+
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -159,6 +168,69 @@ export async function POST(
     return NextResponse.json(
       { error: error.message || "Erro interno no servidor ao registrar pagamento" },
       { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const user = await getAuthUser();
+    if (!user) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+    if (user.role !== "ADMIN" && user.role !== "DEV") {
+      return NextResponse.json({ error: "Apenas administradores podem cancelar parcelas." }, { status: 403 });
+    }
+
+    const { id } = await params;
+    const body = await request.json().catch(() => ({}));
+    const cancelReason: string = body.reason?.trim() || "Cancelamento sem motivo informado";
+
+    const result = await prisma.$transaction(async (tx) => {
+      const installment = await tx.installment.findUnique({
+        where: { id },
+        include: {
+          sale: { select: { saleNumber: true } },
+          customer: { select: { name: true } },
+        },
+      });
+
+      if (!installment) throw new Error("Parcela não encontrada");
+      if (installment.status === "CANCELLED") throw new Error("Esta parcela já está cancelada");
+      if (installment.status === "PAID") throw new Error("Não é possível cancelar uma parcela já paga");
+
+      await tx.installment.update({
+        where: { id },
+        data: { status: "CANCELLED" },
+      });
+
+      await tx.financialTransaction.updateMany({
+        where: { installmentId: id, status: { in: ["PENDING", "OVERDUE"] } },
+        data: { status: "CANCELLED" },
+      });
+
+      return {
+        saleNumber: installment.sale.saleNumber,
+        customerName: installment.customer.name,
+        installmentNumber: installment.installmentNumber,
+      };
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        userId: user.id,
+        action: "CANCELAR_PARCELA",
+        details: `Parcela ${result.installmentNumber} da venda #${String(result.saleNumber).padStart(5, "0")} (${result.customerName}) cancelada. Motivo: ${cancelReason}`,
+      },
+    });
+
+    return NextResponse.json({ message: "Parcela cancelada com sucesso." });
+  } catch (error: any) {
+    console.error("Cancel installment error:", error);
+    return NextResponse.json(
+      { error: error.message || "Erro ao cancelar parcela" },
+      { status: error.message?.includes("não encontrada") || error.message?.includes("já") ? 400 : 500 }
     );
   }
 }

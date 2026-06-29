@@ -1497,6 +1497,7 @@ export const CompanySettingScalarFieldEnum = {
   rg: 'rg',
   ie: 'ie',
   address: 'address',
+  neighborhood: 'neighborhood',
   city: 'city',
   state: 'state',
   cep: 'cep',

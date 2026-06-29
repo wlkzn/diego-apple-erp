@@ -54,10 +54,10 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { name, tipo, tradeName, cnpj, rg, ie, address, city, state, cep, phone, whatsApp, email, logoUrl } = body;
+    const { name, tipo, tradeName, cnpj, rg, ie, address, neighborhood, city, state, cep, phone, whatsApp, email, logoUrl } = body;
 
     if (!name || !cnpj || !address || !phone || !email) {
-      return NextResponse.json({ error: "Campos obrigatórios em falta: nome, CNPJ, endereço, telefone e e-mail." }, { status: 400 });
+      return NextResponse.json({ error: "Campos obrigatórios em falta: nome, CPF/CNPJ, endereço, telefone e e-mail." }, { status: 400 });
     }
 
     let settings = await prisma.companySetting.findFirst();
@@ -77,6 +77,7 @@ export async function PUT(request: Request) {
           rg: rg || null,
           ie: ie || null,
           address: String(address),
+          neighborhood: neighborhood || null,
           city: city || null,
           state: state || null,
           cep: cep || null,
@@ -96,6 +97,7 @@ export async function PUT(request: Request) {
           rg: rg || null,
           ie: ie || null,
           address: String(address),
+          neighborhood: neighborhood || null,
           city: city || null,
           state: state || null,
           cep: cep || null,

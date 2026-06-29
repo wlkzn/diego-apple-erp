@@ -52,6 +52,7 @@ export default function SettingsPage() {
   const [rg, setRg] = useState("");
   const [ie, setIe] = useState("");
   const [address, setAddress] = useState("");
+  const [neighborhood, setNeighborhood] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [cep, setCep] = useState("");
@@ -88,6 +89,7 @@ export default function SettingsPage() {
         setRg(s.rg || "");
         setIe(s.ie || "");
         setAddress(s.address || "");
+        setNeighborhood(s.neighborhood || "");
         setCity(s.city || "");
         setState(s.state || "");
         setCep(s.cep || "");
@@ -149,6 +151,7 @@ export default function SettingsPage() {
       const data = await res.json();
       if (!data.erro) {
         if (data.logradouro) setAddress(data.logradouro);
+        if (data.bairro) setNeighborhood(data.bairro);
         if (data.localidade) setCity(data.localidade);
         if (data.uf) setState(data.uf);
       }
@@ -172,7 +175,7 @@ export default function SettingsPage() {
         body: JSON.stringify({
           name: companyName, tipo, tradeName: tradeName || null,
           cnpj: cnpj.replace(/\D/g, ""), rg: rg.replace(/\D/g, "") || null,
-          ie: ie || null, address,
+          ie: ie || null, address, neighborhood: neighborhood || null,
           city: city || null, state: state || null,
           cep: cep.replace(/\D/g, "") || null,
           phone: phone.replace(/\D/g, ""),
@@ -549,6 +552,19 @@ export default function SettingsPage() {
                       className="w-full px-3.5 py-2.5 bg-input border border-border text-foreground rounded-xl text-sm focus:outline-none"
                       disabled={!isAdmin}
                       required
+                    />
+                  </div>
+
+                  {/* Bairro */}
+                  <div className="col-span-2">
+                    <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Bairro</label>
+                    <input
+                      type="text"
+                      value={neighborhood}
+                      onChange={(e) => setNeighborhood(e.target.value)}
+                      placeholder="Barra da Tijuca"
+                      className="w-full px-3.5 py-2.5 bg-input border border-border text-foreground rounded-xl text-sm focus:outline-none"
+                      disabled={!isAdmin}
                     />
                   </div>
 

@@ -82,6 +82,50 @@ export async function PUT(
   }
 }
 
+export async function PATCH(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const user = await getAuthUser();
+    if (!user) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+    if (user.role !== "ADMIN" && user.role !== "DEV") {
+      return NextResponse.json({ error: "Apenas administradores podem cancelar lançamentos." }, { status: 403 });
+    }
+
+    const { id } = await params;
+
+    const existingTx = await prisma.financialTransaction.findUnique({ where: { id } });
+    if (!existingTx) return NextResponse.json({ error: "Transação não encontrada" }, { status: 404 });
+    if (existingTx.status === "CANCELLED") {
+      return NextResponse.json({ error: "Este lançamento já está cancelado." }, { status: 400 });
+    }
+    if (existingTx.saleId || existingTx.installmentId) {
+      return NextResponse.json({
+        error: "Lançamentos automáticos de vendas ou parcelas não podem ser cancelados individualmente. Cancele a venda ou parcela correspondente.",
+      }, { status: 400 });
+    }
+
+    await prisma.financialTransaction.update({
+      where: { id },
+      data: { status: "CANCELLED" },
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        userId: user.id,
+        action: "CANCELAR_LANCAMENTO",
+        details: `Lançamento "${existingTx.category}" (R$ ${existingTx.amount.toFixed(2)}) cancelado. O registro permanece no histórico.`,
+      },
+    });
+
+    return NextResponse.json({ message: "Lançamento cancelado com sucesso. O registro foi mantido no histórico." });
+  } catch (error: any) {
+    console.error("Cancel transaction error:", error);
+    return NextResponse.json({ error: "Erro ao cancelar lançamento", detail: error?.message }, { status: 500 });
+  }
+}
+
 export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }

@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/components/Toast";
-import { maskCPF, maskCEP } from "@/lib/masks";
+import { maskCPF, maskCNPJ, maskCEP, maskPhone } from "@/lib/masks";
 import {
   Printer,
   ArrowLeft,
@@ -66,14 +66,16 @@ interface Company {
   tradeName: string | null;
   tipo: string | null;
   cnpj: string;
+  rg: string | null;
+  ie: string | null;
   address: string;
+  neighborhood: string | null;
   city: string | null;
   state: string | null;
   cep: string | null;
   phone: string;
   whatsApp: string | null;
   email: string;
-  ie: string | null;
   logoUrl: string | null;
   contractTerms: string | null;
 }
@@ -172,14 +174,20 @@ export default function ContractPage() {
     c.cep ? `CEP ${maskCEP(c.cep)}` : null,
   ].filter(Boolean).join(", ") || "endereço não informado";
 
+  const isPJ = (company.tipo ?? "PJ") !== "PF";
+
   const enderecoEmpresa = [
     company.address,
+    company.neighborhood,
     company.city,
     company.state,
     company.cep ? `CEP ${maskCEP(company.cep)}` : null,
   ].filter(Boolean).join(", ");
 
   const foroCidade = `${company.city ?? ""}${company.state ? `/${company.state}` : ""}` || "desta comarca";
+
+  const telFormatted = maskPhone(company.phone);
+  const waFormatted = company.whatsApp ? maskPhone(company.whatsApp) : null;
 
   const valorFinanciado = Math.max(sale.netAmount - sale.downPayment, 0);
   const valorParcela = sale.installmentCount > 0
@@ -272,11 +280,22 @@ export default function ContractPage() {
             )}
             <div className="space-y-1">
               <h1 className="text-xl font-black uppercase tracking-tight">{company.name}</h1>
-              <p className="text-xs text-zinc-600">CNPJ: {company.cnpj}</p>
-              <p className="text-xs text-zinc-600">{enderecoEmpresa}</p>
+              {isPJ ? (
+                <>
+                  {company.tradeName && <p className="text-xs text-zinc-600">Nome Fantasia: {company.tradeName}</p>}
+                  <p className="text-xs text-zinc-600">CNPJ: {maskCNPJ(company.cnpj)}</p>
+                  {company.ie && <p className="text-xs text-zinc-600">IE: {company.ie}</p>}
+                </>
+              ) : (
+                <>
+                  <p className="text-xs text-zinc-600">CPF: {maskCPF(company.cnpj)}</p>
+                  {company.rg && <p className="text-xs text-zinc-600">RG: {company.rg}</p>}
+                </>
+              )}
+              {enderecoEmpresa && <p className="text-xs text-zinc-600">{enderecoEmpresa}</p>}
               <p className="text-xs text-zinc-600">
-                Tel: {company.phone}
-                {company.whatsApp ? ` | WhatsApp: ${company.whatsApp}` : ""}
+                Tel: {telFormatted}
+                {waFormatted ? ` | WhatsApp: ${waFormatted}` : ""}
                 {" | "}Email: {company.email}
               </p>
             </div>
@@ -301,10 +320,20 @@ export default function ContractPage() {
           <p>
             Pelo presente instrumento particular, de um lado, na qualidade de{" "}
             <strong>CONTRATADA</strong>: <strong>{company.name}</strong>
-            {company.tradeName ? `, nome fantasia ${company.tradeName}` : ""},
-            inscrita no CNPJ sob o nº <strong>{company.cnpj}</strong>, com sede em{" "}
-            {enderecoEmpresa}; e de outro lado, na qualidade de{" "}
-            <strong>COMPRADOR(A)</strong>: <strong>{c.name}</strong>, portador
+            {isPJ ? (
+              <>
+                {company.tradeName ? `, nome fantasia ${company.tradeName}` : ""},
+                {" "}inscrita no CNPJ sob o nº <strong>{maskCNPJ(company.cnpj)}</strong>
+                {company.ie ? `, Inscrição Estadual nº ${company.ie}` : ""}
+              </>
+            ) : (
+              <>
+                , portadora do CPF nº <strong>{maskCPF(company.cnpj)}</strong>
+                {company.rg ? `, RG nº ${company.rg}` : ""}
+              </>
+            )}
+            {enderecoEmpresa ? `, com sede em ${enderecoEmpresa}` : ""}; e de outro lado, na
+            qualidade de <strong>COMPRADOR(A)</strong>: <strong>{c.name}</strong>, portador
             {c.rg ? ` do RG nº ${c.rg} e` : ""} do CPF nº{" "}
             <strong>{maskCPF(c.cpf)}</strong>, residente e domiciliado em{" "}
             {enderecoCliente}; têm entre si justo e contratado o que se segue nas
@@ -617,7 +646,11 @@ export default function ContractPage() {
           <div className="space-y-1">
             <div className="border-t border-zinc-400 w-full pt-2" />
             <p className="font-bold text-zinc-900">{company.name}</p>
-            <p className="text-[10px] text-zinc-500">CONTRATADA (CNPJ: {company.cnpj})</p>
+            <p className="text-[10px] text-zinc-500">
+              {isPJ
+                ? `CONTRATADA (CNPJ: ${maskCNPJ(company.cnpj)})`
+                : `CONTRATADA (CPF: ${maskCPF(company.cnpj)})`}
+            </p>
           </div>
         </div>
 

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import { useToast } from "@/components/Toast";
+import { useUser } from "@/context/UserContext";
 import { maskMoney, parseMoneyToFloat } from "@/lib/masks";
 import {
   DollarSign,
@@ -17,8 +18,8 @@ import {
   AlertCircle,
   ArrowUpRight,
   ArrowDownRight,
-  ArrowRight,
-  Filter,
+  XCircle,
+  Ban,
 } from "lucide-react";
 
 interface Transaction {
@@ -28,14 +29,12 @@ interface Transaction {
   amount: number;
   date: string;
   description: string | null;
-  status: "PAID" | "PENDING" | "OVERDUE";
+  status: "PAID" | "PENDING" | "OVERDUE" | "CANCELLED";
   saleId: string | null;
   installmentId: string | null;
   sale?: {
     saleNumber: number;
-    customer: {
-      name: string;
-    };
+    customer: { name: string };
   };
 }
 
@@ -48,6 +47,9 @@ interface Summary {
 }
 
 export default function FinancialPage() {
+  const { user } = useUser();
+  const isAdmin = user?.role === "ADMIN" || user?.role === "DEV";
+
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [summary, setSummary] = useState<Summary>({
     entradasPagas: 0,
@@ -57,7 +59,6 @@ export default function FinancialPage() {
     saidasPendentes: 0,
   });
 
-  // Filters State (Default is current month start to end)
   const getInitialDates = () => {
     const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -75,11 +76,9 @@ export default function FinancialPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-  // Modal State
+  // New transaction modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Form State
   const [type, setType] = useState<"INFLOW" | "OUTFLOW">("OUTFLOW");
   const [category, setCategory] = useState("Despesa Administrativa");
   const [amount, setAmount] = useState("");
@@ -87,9 +86,13 @@ export default function FinancialPage() {
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState<"PAID" | "PENDING">("PAID");
 
-  // Delete State
+  // Delete state
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Cancel state (soft cancel)
+  const [cancelConfirmId, setCancelConfirmId] = useState<string | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const { showToast } = useToast();
 
@@ -102,7 +105,6 @@ export default function FinancialPage() {
         type: typeFilter,
         status: statusFilter,
       });
-
       const res = await fetch(`/api/financial?${queryParams.toString()}`);
       if (res.ok) {
         const data = await res.json();
@@ -133,35 +135,21 @@ export default function FinancialPage() {
     setIsModalOpen(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     const cleanAmount = parseMoneyToFloat(amount);
     if (cleanAmount <= 0) {
       showToast("O valor do lançamento deve ser maior que zero", "warning");
       return;
     }
-
     setIsSubmitting(true);
-
-    const payload = {
-      type,
-      category,
-      amount: cleanAmount,
-      date,
-      description: description || null,
-      status,
-    };
-
     try {
       const res = await fetch("/api/financial", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ type, category, amount: cleanAmount, date, description: description || null, status }),
       });
-
       const data = await res.json();
-
       if (res.ok) {
         showToast(data.message, "success");
         setIsModalOpen(false);
@@ -177,17 +165,33 @@ export default function FinancialPage() {
     }
   };
 
+  const handleCancel = async () => {
+    if (!cancelConfirmId) return;
+    setIsCancelling(true);
+    try {
+      const res = await fetch(`/api/financial/${cancelConfirmId}`, { method: "PATCH" });
+      const data = await res.json();
+      if (res.ok) {
+        showToast(data.message, "success");
+        setCancelConfirmId(null);
+        loadData();
+      } else {
+        showToast(data.error || "Não foi possível cancelar o lançamento", "error");
+      }
+    } catch (error) {
+      console.error(error);
+      showToast("Erro ao conectar com o servidor", "error");
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
   const handleDelete = async () => {
     if (!deleteConfirmId) return;
-
     setIsDeleting(true);
     try {
-      const res = await fetch(`/api/financial/${deleteConfirmId}`, {
-        method: "DELETE",
-      });
-
+      const res = await fetch(`/api/financial/${deleteConfirmId}`, { method: "DELETE" });
       const data = await res.json();
-
       if (res.ok) {
         showToast(data.message, "success");
         setDeleteConfirmId(null);
@@ -203,15 +207,17 @@ export default function FinancialPage() {
     }
   };
 
-  const formatBRL = (val: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(val);
-  };
+  const formatBRL = (val: number) =>
+    new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(val);
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("pt-BR");
+  const formatDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleDateString("pt-BR");
+
+  const statusConfig: Record<string, { color: string; text: string }> = {
+    PAID:      { color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20", text: "Liquidado" },
+    PENDING:   { color: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",         text: "Pendente" },
+    OVERDUE:   { color: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",             text: "Vencido" },
+    CANCELLED: { color: "bg-zinc-500/10 text-zinc-500 dark:text-zinc-400 border-zinc-500/20",             text: "Cancelado" },
   };
 
   const categoriesOptions = {
@@ -229,7 +235,7 @@ export default function FinancialPage() {
 
   return (
     <div className="space-y-8 select-none">
-      
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -241,7 +247,6 @@ export default function FinancialPage() {
             Lance despesas, acompanhe o fluxo de caixa pago e simule receitas futuras em aberto.
           </p>
         </div>
-        
         <button
           onClick={openNewModal}
           className="flex items-center justify-center gap-2 px-4.5 py-3 bg-primary text-primary-foreground font-semibold rounded-xl text-sm transition-all duration-200 cursor-pointer shadow-sm hover:opacity-90 active:scale-98"
@@ -251,10 +256,8 @@ export default function FinancialPage() {
         </button>
       </div>
 
-      {/* Financial Summary Cards */}
+      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4.5">
-        
-        {/* Saldo Líquido em Caixa */}
         <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-1.5 col-span-1 md:col-span-2 lg:col-span-1">
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Saldo em Caixa</span>
           <div className={`text-2xl font-black ${summary.saldoLiquido >= 0 ? "text-foreground" : "text-rose-600 dark:text-rose-400"}`}>
@@ -263,60 +266,45 @@ export default function FinancialPage() {
           <span className="text-[10px] text-muted-foreground font-semibold">Total de receitas liquidas</span>
         </div>
 
-        {/* Entradas Pagas */}
         <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-1.5">
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block flex items-center gap-1">
             <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
             <span>Entradas Pagas</span>
           </span>
-          <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
-            {formatBRL(summary.entradasPagas)}
-          </div>
+          <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{formatBRL(summary.entradasPagas)}</div>
           <span className="text-[10px] text-muted-foreground font-semibold">Faturamento efetivado</span>
         </div>
 
-        {/* Despesas Pagas */}
         <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-1.5">
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block flex items-center gap-1">
             <TrendingDown className="w-3.5 h-3.5 text-rose-500" />
             <span>Saídas Pagas</span>
           </span>
-          <div className="text-2xl font-black text-rose-600 dark:text-rose-400">
-            {formatBRL(summary.saidasPagas)}
-          </div>
+          <div className="text-2xl font-black text-rose-600 dark:text-rose-400">{formatBRL(summary.saidasPagas)}</div>
           <span className="text-[10px] text-muted-foreground font-semibold">Despesas quitadas</span>
         </div>
 
-        {/* Contas a Receber */}
         <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-1.5">
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block flex items-center gap-1">
             <Clock className="w-3.5 h-3.5 text-amber-500" />
             <span>Contas a Receber</span>
           </span>
-          <div className="text-2xl font-black text-foreground">
-            {formatBRL(summary.entradasPendentes)}
-          </div>
+          <div className="text-2xl font-black text-foreground">{formatBRL(summary.entradasPendentes)}</div>
           <span className="text-[10px] text-muted-foreground font-semibold">Parcelas pendentes</span>
         </div>
 
-        {/* Contas a Pagar */}
         <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-1.5">
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block flex items-center gap-1">
             <Clock className="w-3.5 h-3.5 text-amber-500" />
             <span>Contas a Pagar</span>
           </span>
-          <div className="text-2xl font-black text-rose-600 dark:text-rose-400">
-            {formatBRL(summary.saidasPendentes)}
-          </div>
+          <div className="text-2xl font-black text-rose-600 dark:text-rose-400">{formatBRL(summary.saidasPendentes)}</div>
           <span className="text-[10px] text-muted-foreground font-semibold">Despesas a vencer</span>
         </div>
-
       </div>
 
-      {/* Filters Form */}
+      {/* Filters */}
       <div className="bg-card border border-border p-4 rounded-2xl shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-        
-        {/* Date Ranges */}
         <div className="flex flex-wrap items-center gap-3.5 w-full md:w-auto">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-muted-foreground" />
@@ -336,10 +324,7 @@ export default function FinancialPage() {
           />
         </div>
 
-        {/* Filter selects */}
         <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-          
-          {/* Type Filter */}
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
@@ -350,7 +335,6 @@ export default function FinancialPage() {
             <option value="OUTFLOW">Saídas (Despesas)</option>
           </select>
 
-          {/* Status Filter */}
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -359,6 +343,8 @@ export default function FinancialPage() {
             <option value="">Todos Status</option>
             <option value="PAID">Liquidado / Pago</option>
             <option value="PENDING">Pendente</option>
+            <option value="OVERDUE">Vencido</option>
+            <option value="CANCELLED">Cancelado</option>
           </select>
         </div>
       </div>
@@ -390,36 +376,28 @@ export default function FinancialPage() {
               </thead>
               <tbody className="divide-y divide-border/60">
                 {transactions.map((t) => {
-                  const statusColors = {
-                    PAID: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
-                    PENDING: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
-                    OVERDUE: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",
-                  }[t.status];
-
-                  const statusTexts = {
-                    PAID: "Liquidado",
-                    PENDING: "Pendente",
-                    OVERDUE: "Vencido",
-                  }[t.status];
-
+                  const cfg = statusConfig[t.status] ?? statusConfig.PENDING;
                   const isManual = !t.saleId && !t.installmentId;
+                  const isCancelled = t.status === "CANCELLED";
 
                   return (
-                    <tr key={t.id} className="hover:bg-muted/10 transition-colors">
+                    <tr key={t.id} className={`hover:bg-muted/10 transition-colors ${isCancelled ? "opacity-50" : ""}`}>
                       <td className="px-6 py-4 text-muted-foreground font-medium">
                         {formatDate(t.date)}
                       </td>
-                      <td className="px-6 py-4 font-semibold text-foreground flex items-center gap-2">
-                        {t.type === "INFLOW" ? (
-                          <div className="p-1 bg-emerald-500/10 text-emerald-600 rounded-md">
-                            <ArrowUpRight className="w-3.5 h-3.5" />
-                          </div>
-                        ) : (
-                          <div className="p-1 bg-rose-500/10 text-rose-600 rounded-md">
-                            <ArrowDownRight className="w-3.5 h-3.5" />
-                          </div>
-                        )}
-                        <span>{t.category}</span>
+                      <td className="px-6 py-4 font-semibold text-foreground">
+                        <div className="flex items-center gap-2">
+                          {t.type === "INFLOW" ? (
+                            <div className="p-1 bg-emerald-500/10 text-emerald-600 rounded-md">
+                              <ArrowUpRight className="w-3.5 h-3.5" />
+                            </div>
+                          ) : (
+                            <div className="p-1 bg-rose-500/10 text-rose-600 rounded-md">
+                              <ArrowDownRight className="w-3.5 h-3.5" />
+                            </div>
+                          )}
+                          <span>{t.category}</span>
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-muted-foreground font-medium">
                         {t.description || "-"}
@@ -430,30 +408,41 @@ export default function FinancialPage() {
                             <span className="font-bold">Venda #{String(t.sale.saleNumber).padStart(5, "0")}</span>
                             <span className="block text-[10px] text-muted-foreground leading-none mt-1">({t.sale.customer.name})</span>
                           </div>
-                        ) : (
-                          "-"
-                        )}
+                        ) : "-"}
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`px-2 py-0.5 rounded-full border text-[9px] font-bold ${statusColors}`}>
-                          {statusTexts}
+                        <span className={`px-2 py-0.5 rounded-full border text-[9px] font-bold ${cfg.color}`}>
+                          {cfg.text}
                         </span>
                       </td>
-                      <td className={`px-6 py-4 text-right font-extrabold ${t.type === "INFLOW" ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
+                      <td className={`px-6 py-4 text-right font-extrabold ${isCancelled ? "text-muted-foreground line-through" : t.type === "INFLOW" ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
                         {t.type === "INFLOW" ? "+" : "-"} {formatBRL(t.amount)}
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center justify-center">
-                          {isManual ? (
+                        <div className="flex items-center justify-center gap-1">
+                          {isManual && !isCancelled && isAdmin && (
+                            <button
+                              onClick={() => setCancelConfirmId(t.id)}
+                              className="p-1.5 text-muted-foreground hover:text-amber-600 hover:bg-amber-500/10 rounded-lg transition-colors cursor-pointer"
+                              title="Cancelar Lançamento (manter histórico)"
+                            >
+                              <Ban className="w-4 h-4" />
+                            </button>
+                          )}
+                          {isManual && isAdmin && (
                             <button
                               onClick={() => setDeleteConfirmId(t.id)}
-                              className="p-2 text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
-                              title="Excluir Lançamento Manual"
+                              className="p-1.5 text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
+                              title="Excluir permanentemente"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
-                          ) : (
+                          )}
+                          {!isManual && (
                             <span className="text-[10px] text-muted-foreground/60 select-none font-semibold">Automático</span>
+                          )}
+                          {isManual && !isAdmin && (
+                            <span className="text-[10px] text-muted-foreground/40 select-none">—</span>
                           )}
                         </div>
                       </td>
@@ -466,7 +455,7 @@ export default function FinancialPage() {
         )}
       </div>
 
-      {/* Manual Transaction Modal */}
+      {/* New Transaction Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-card border border-border rounded-2xl w-full max-w-md shadow-2xl animate-slide-in">
@@ -475,163 +464,76 @@ export default function FinancialPage() {
                 <PlusCircle className="w-5 h-5 text-muted-foreground" />
                 <span>Registrar Lançamento Financeiro</span>
               </h3>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-muted-foreground hover:text-foreground p-1.5 rounded-lg hover:bg-muted cursor-pointer"
-              >
+              <button onClick={() => setIsModalOpen(false)} className="text-muted-foreground hover:text-foreground p-1.5 rounded-lg hover:bg-muted cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              
-              {/* Type selector */}
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">
-                  Tipo de Movimentação *
-                </label>
+                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Tipo de Movimentação *</label>
                 <div className="grid grid-cols-2 gap-3.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setType("INFLOW");
-                      setCategory("Outras Receitas");
-                    }}
-                    className={`py-2 px-3 border rounded-xl font-bold text-sm cursor-pointer flex items-center justify-center gap-2 transition-all ${
-                      type === "INFLOW"
-                        ? "bg-emerald-500/10 border-emerald-500 text-emerald-600 dark:text-emerald-400"
-                        : "border-border text-muted-foreground hover:text-foreground bg-card"
-                    }`}
-                  >
+                  <button type="button" onClick={() => { setType("INFLOW"); setCategory("Outras Receitas"); }}
+                    className={`py-2 px-3 border rounded-xl font-bold text-sm cursor-pointer flex items-center justify-center gap-2 transition-all ${type === "INFLOW" ? "bg-emerald-500/10 border-emerald-500 text-emerald-600 dark:text-emerald-400" : "border-border text-muted-foreground hover:text-foreground bg-card"}`}>
                     <ArrowUpRight className="w-4.5 h-4.5" />
                     <span>Receita (Entrada)</span>
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setType("OUTFLOW");
-                      setCategory("Despesa Administrativa");
-                    }}
-                    className={`py-2 px-3 border rounded-xl font-bold text-sm cursor-pointer flex items-center justify-center gap-2 transition-all ${
-                      type === "OUTFLOW"
-                        ? "bg-rose-500/10 border-rose-500 text-rose-600 dark:text-rose-400"
-                        : "border-border text-muted-foreground hover:text-foreground bg-card"
-                    }`}
-                  >
+                  <button type="button" onClick={() => { setType("OUTFLOW"); setCategory("Despesa Administrativa"); }}
+                    className={`py-2 px-3 border rounded-xl font-bold text-sm cursor-pointer flex items-center justify-center gap-2 transition-all ${type === "OUTFLOW" ? "bg-rose-500/10 border-rose-500 text-rose-600 dark:text-rose-400" : "border-border text-muted-foreground hover:text-foreground bg-card"}`}>
                     <ArrowDownRight className="w-4.5 h-4.5" />
                     <span>Despesa (Saída)</span>
                   </button>
                 </div>
               </div>
 
-              {/* Categoria */}
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">
-                  Categoria *
-                </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-input border border-border text-foreground rounded-xl text-sm focus:outline-none"
-                  required
-                >
-                  {type === "INFLOW"
-                    ? categoriesOptions.INFLOW.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))
-                    : categoriesOptions.OUTFLOW.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
+                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Categoria *</label>
+                <select value={category} onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-input border border-border text-foreground rounded-xl text-sm focus:outline-none" required>
+                  {(type === "INFLOW" ? categoriesOptions.INFLOW : categoriesOptions.OUTFLOW).map((opt) => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
                 </select>
               </div>
 
-              {/* Valor e Data */}
               <div className="grid grid-cols-2 gap-4">
-                {/* Valor */}
                 <div>
-                  <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">
-                    Valor Lançado *
-                  </label>
-                  <input
-                    type="text"
-                    value={amount}
-                    onChange={(e) => setAmount(maskMoney(e.target.value))}
+                  <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Valor Lançado *</label>
+                  <input type="text" value={amount} onChange={(e) => setAmount(maskMoney(e.target.value))}
                     placeholder="R$ 0,00"
-                    className="w-full px-3.5 py-2.5 bg-input border border-border text-foreground placeholder-muted-foreground/60 rounded-xl text-sm focus:outline-none"
-                    required
-                  />
+                    className="w-full px-3.5 py-2.5 bg-input border border-border text-foreground placeholder-muted-foreground/60 rounded-xl text-sm focus:outline-none" required />
                 </div>
-
-                {/* Data */}
                 <div>
-                  <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">
-                    Data do Lançamento *
-                  </label>
-                  <input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-input border border-border text-foreground rounded-xl text-sm focus:outline-none"
-                    required
-                  />
+                  <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Data do Lançamento *</label>
+                  <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-input border border-border text-foreground rounded-xl text-sm focus:outline-none" required />
                 </div>
               </div>
 
-              {/* Status */}
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">
-                  Status de Liquidação *
-                </label>
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value as any)}
-                  className="w-full px-3.5 py-2.5 bg-input border border-border text-foreground rounded-xl text-sm focus:outline-none"
-                >
+                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Status de Liquidação *</label>
+                <select value={status} onChange={(e) => setStatus(e.target.value as any)}
+                  className="w-full px-3.5 py-2.5 bg-input border border-border text-foreground rounded-xl text-sm focus:outline-none">
                   <option value="PAID">Pago / Efetivado</option>
                   <option value="PENDING">Pendente / Em Aberto</option>
                 </select>
               </div>
 
-              {/* Descrição */}
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">
-                  Descrição (Opcional)
-                </label>
-                <input
-                  type="text"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">Descrição (Opcional)</label>
+                <input type="text" value={description} onChange={(e) => setDescription(e.target.value)}
                   placeholder="Ex: Compra de 5 capas de iPhone"
-                  className="w-full px-3.5 py-2.5 bg-input border border-border text-foreground placeholder-muted-foreground/60 rounded-xl text-sm focus:outline-none"
-                />
+                  className="w-full px-3.5 py-2.5 bg-input border border-border text-foreground placeholder-muted-foreground/60 rounded-xl text-sm focus:outline-none" />
               </div>
 
-              {/* Actions */}
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-border mt-6">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2.5 border border-border text-foreground hover:bg-muted font-semibold rounded-xl text-sm transition-colors cursor-pointer"
-                >
+                <button type="button" onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2.5 border border-border text-foreground hover:bg-muted font-semibold rounded-xl text-sm transition-colors cursor-pointer">
                   Cancelar
                 </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground font-semibold rounded-xl text-sm hover:opacity-90 active:scale-98 transition-colors cursor-pointer disabled:opacity-50"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Salvando...</span>
-                    </>
-                  ) : (
-                    <span>Registrar Lançamento</span>
-                  )}
+                <button type="submit" disabled={isSubmitting}
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground font-semibold rounded-xl text-sm hover:opacity-90 active:scale-98 transition-colors cursor-pointer disabled:opacity-50">
+                  {isSubmitting ? (<><Loader2 className="w-4 h-4 animate-spin" /><span>Salvando...</span></>) : <span>Registrar Lançamento</span>}
                 </button>
               </div>
             </form>
@@ -639,7 +541,36 @@ export default function FinancialPage() {
         </div>
       )}
 
-      {/* Delete Confirmation */}
+      {/* Cancel Confirmation Modal */}
+      {cancelConfirmId && (
+        <div className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-2xl w-full max-w-md shadow-2xl p-6 animate-slide-in">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl">
+                <XCircle className="w-6 h-6" />
+              </div>
+              <div className="space-y-1.5">
+                <h3 className="text-lg font-bold text-foreground">Cancelar Lançamento?</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  O lançamento será marcado como <strong>Cancelado</strong> e <strong>não será computado</strong> no fluxo de caixa ou relatórios. O registro permanecerá no histórico para auditoria.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-border">
+              <button onClick={() => setCancelConfirmId(null)} disabled={isCancelling}
+                className="px-4 py-2.5 border border-border text-foreground hover:bg-muted font-semibold rounded-xl text-sm transition-colors cursor-pointer">
+                Voltar
+              </button>
+              <button onClick={handleCancel} disabled={isCancelling}
+                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-amber-600 text-white hover:bg-amber-700 font-semibold rounded-xl text-sm transition-colors cursor-pointer disabled:opacity-50">
+                {isCancelling ? (<><Loader2 className="w-4.5 h-4.5 animate-spin" /><span>Cancelando...</span></>) : <span>Sim, Cancelar</span>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
       {deleteConfirmId && (
         <div className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-card border border-border rounded-2xl w-full max-w-md shadow-2xl p-6 animate-slide-in">
@@ -648,34 +579,20 @@ export default function FinancialPage() {
                 <AlertCircle className="w-6 h-6" />
               </div>
               <div className="space-y-1.5">
-                <h3 className="text-lg font-bold text-foreground">Excluir Lançamento Manual?</h3>
+                <h3 className="text-lg font-bold text-foreground">Excluir Permanentemente?</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Tem certeza que deseja excluir esta transação? Essa ação apagará permanentemente o registro de caixa e criará um log de auditoria.
+                  Tem certeza? Essa ação <strong>apagará definitivamente</strong> o registro e não poderá ser desfeita. Para manter o histórico, use o cancelamento.
                 </p>
               </div>
             </div>
-
             <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-border">
-              <button
-                onClick={() => setDeleteConfirmId(null)}
-                disabled={isDeleting}
-                className="px-4 py-2.5 border border-border text-foreground hover:bg-muted font-semibold rounded-xl text-sm transition-colors cursor-pointer"
-              >
-                Cancelar
+              <button onClick={() => setDeleteConfirmId(null)} disabled={isDeleting}
+                className="px-4 py-2.5 border border-border text-foreground hover:bg-muted font-semibold rounded-xl text-sm transition-colors cursor-pointer">
+                Voltar
               </button>
-              <button
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-rose-600 text-white hover:bg-rose-700 font-semibold rounded-xl text-sm transition-colors cursor-pointer disabled:opacity-50"
-              >
-                {isDeleting ? (
-                  <>
-                    <Loader2 className="w-4.5 h-4.5 animate-spin" />
-                    <span>Excluindo...</span>
-                  </>
-                ) : (
-                  <span>Sim, Excluir</span>
-                )}
+              <button onClick={handleDelete} disabled={isDeleting}
+                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-rose-600 text-white hover:bg-rose-700 font-semibold rounded-xl text-sm transition-colors cursor-pointer disabled:opacity-50">
+                {isDeleting ? (<><Loader2 className="w-4.5 h-4.5 animate-spin" /><span>Excluindo...</span></>) : <span>Sim, Excluir</span>}
               </button>
             </div>
           </div>
