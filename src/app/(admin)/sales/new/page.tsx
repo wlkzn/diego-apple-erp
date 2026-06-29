@@ -337,8 +337,8 @@ export default function NewSalePage() {
         price: item.customPrice,
       })),
       discountAmount: discountVal,
-      surchargeAmount: paymentMethod === "PARCELADO_LOJA" ? surchargeVal : 0,
-      downPayment: downPaymentVal,
+      surchargeAmount: surchargeVal,
+      downPayment: paymentMethod === "PARCELADO_LOJA" ? downPaymentVal : 0,
       paymentMethod,
       installmentCount: paymentMethod === "PARCELADO_LOJA" ? installmentCount : 1,
       installmentDueDay: paymentMethod === "PARCELADO_LOJA" ? installmentDueDay : 10,
@@ -760,6 +760,20 @@ export default function NewSalePage() {
               </div>
             </div>
 
+            {/* Acréscimo */}
+            <div className="col-span-2 md:col-span-1">
+              <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">
+                Acréscimo (Juros / Taxa de Cartão)
+              </label>
+              <input
+                type="text"
+                value={surchargeInput}
+                onChange={(e) => setSurchargeInput(maskMoney(e.target.value))}
+                placeholder="R$ 0,00"
+                className="w-full px-3.5 py-2.5 bg-input border border-border text-foreground placeholder-muted-foreground/60 rounded-xl text-sm focus:outline-none"
+              />
+            </div>
+
             {/* Configs adicionais para parcelamento na loja */}
             {paymentMethod === "PARCELADO_LOJA" && (
               <>
@@ -772,20 +786,6 @@ export default function NewSalePage() {
                     type="text"
                     value={downPaymentInput}
                     onChange={(e) => setDownPaymentInput(maskMoney(e.target.value))}
-                    placeholder="R$ 0,00"
-                    className="w-full px-3.5 py-2.5 bg-input border border-border text-foreground placeholder-muted-foreground/60 rounded-xl text-sm focus:outline-none"
-                  />
-                </div>
-
-                {/* Acréscimo */}
-                <div>
-                  <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">
-                    Acréscimo (Juros / Taxa)
-                  </label>
-                  <input
-                    type="text"
-                    value={surchargeInput}
-                    onChange={(e) => setSurchargeInput(maskMoney(e.target.value))}
                     placeholder="R$ 0,00"
                     className="w-full px-3.5 py-2.5 bg-input border border-border text-foreground placeholder-muted-foreground/60 rounded-xl text-sm focus:outline-none"
                   />
@@ -1127,7 +1127,7 @@ export default function NewSalePage() {
                   <span>- {formatBRL(tradeInVal)}</span>
                 </div>
               )}
-              {paymentMethod === "PARCELADO_LOJA" && surchargeVal > 0 && (
+              {surchargeVal > 0 && (
                 <div className="flex items-center justify-between text-sky-600 dark:text-sky-400 font-bold">
                   <span>Acréscimo</span>
                   <span>+ {formatBRL(surchargeVal)}</span>
@@ -1294,7 +1294,7 @@ export default function NewSalePage() {
                         <span>Trade-in</span><span>— {formatBRL(tradeInVal)}</span>
                       </div>
                     )}
-                    {paymentMethod === "PARCELADO_LOJA" && surchargeVal > 0 && (
+                    {surchargeVal > 0 && (
                       <div className="flex justify-between px-3 py-2 text-sky-600 dark:text-sky-400">
                         <span>Acréscimo</span><span>+ {formatBRL(surchargeVal)}</span>
                       </div>
