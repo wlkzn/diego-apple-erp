@@ -99,11 +99,11 @@ export function CashFlowBarChart({ data }: { data: CashFlowPoint[] }) {
 // ── Payment Methods Pie Chart ────────────────────────────────────────────────
 const PM_COLORS: Record<string, string> = {
   PIX: "#10b981", DINHEIRO: "#f59e0b", CARTAO: "#3b82f6",
-  BOLETO: "#8b5cf6", PARCELADO_LOJA: "#f43f5e",
+  BOLETO: "#8b5cf6", PARCELADO_LOJA: "#f43f5e", ENTRADA_SINAL: "#0ea5e9"
 };
 export const PM_LABELS: Record<string, string> = {
   PIX: "Pix", DINHEIRO: "Dinheiro", CARTAO: "Cartão",
-  BOLETO: "Boleto", PARCELADO_LOJA: "Parcelado Loja",
+  BOLETO: "Boleto", PARCELADO_LOJA: "Parcelado Loja", ENTRADA_SINAL: "Entrada (Sinal)"
 };
 
 function PieInnerLabel({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) {

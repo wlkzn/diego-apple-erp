@@ -52,6 +52,7 @@ export async function GET(request: Request) {
         select: {
           id: true, saleNumber: true, netAmount: true, discountAmount: true,
           surchargeAmount: true, paymentMethod: true, createdAt: true,
+          downPayment: true,
           customer: { select: { id: true, name: true } },
           items: {
             select: {
@@ -114,12 +115,7 @@ export async function GET(request: Request) {
       prisma.customer.count(),
       prisma.customer.count({ where: { createdAt: { gte: from, lte: to } } }),
       // Payment methods (groupBy with simple _count: true)
-      prisma.sale.groupBy({
-        by: ["paymentMethod"],
-        where: { createdAt: { gte: from, lte: to }, status: "ACTIVE" },
-        _sum: { netAmount: true },
-        _count: true,
-      }),
+      Promise.resolve([]),
       // Recent sales (last 10)
       prisma.sale.findMany({
         take: 10, orderBy: { createdAt: "desc" },
@@ -222,11 +218,41 @@ export async function GET(request: Request) {
     }
     const revenueChart = Array.from(dailyMap.entries()).map(([date, v]) => ({ date, ...v }));
 
-    // Payment methods (groupBy returns _count as number when _count: true)
-    const paymentMethods = pmGrouped.map(g => ({
-      method: g.paymentMethod,
-      count: typeof g._count === "number" ? g._count : (g._count as any)._all ?? 0,
-      total: g._sum?.netAmount ?? 0,
+    // Payment methods
+    const pmMap = new Map<string, { count: number; total: number }>();
+    for (const sale of salesCurrent) {
+      const pm = sale.paymentMethod;
+      const net = sale.netAmount - (sale.surchargeAmount || 0);
+      const dp = sale.downPayment || 0;
+      
+      if (pm === "PARCELADO_LOJA" && dp > 0) {
+        const financed = net - dp;
+        
+        // Parte parcelada
+        if (financed > 0) {
+          const curPm = pmMap.get(pm) ?? { count: 0, total: 0 };
+          curPm.count += 1;
+          curPm.total += financed;
+          pmMap.set(pm, curPm);
+        }
+        
+        // Entrada (Sinal) - normalmente paga em pix/dinheiro no ato
+        const entryKey = "ENTRADA_SINAL";
+        const curEntry = pmMap.get(entryKey) ?? { count: 0, total: 0 };
+        curEntry.count += (financed > 0 ? 0 : 1); // evita dobrar a contagem da venda, a não ser que seja só entrada
+        curEntry.total += dp;
+        pmMap.set(entryKey, curEntry);
+      } else {
+        const curPm = pmMap.get(pm) ?? { count: 0, total: 0 };
+        curPm.count += 1;
+        curPm.total += net;
+        pmMap.set(pm, curPm);
+      }
+    }
+    const paymentMethods = Array.from(pmMap.entries()).map(([method, val]) => ({
+      method,
+      count: val.count,
+      total: val.total,
     }));
 
     // Top products & brands
